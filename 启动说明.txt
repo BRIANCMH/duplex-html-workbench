@@ -18,5 +18,6 @@ http://127.0.0.1:4179/duplex-four-case-template.html
   generated/：新生成的 TTS
   reference/：已有参考音频
 音轨区支持拖动片段调整开口时码；点击“保存编辑”后写入 annotation-edits.json。
+助手音轨可绑定用户语音并设置响应间隔（默认 400ms）；移动用户片段时，已绑定的助手片段会同步移动。
 使用“导出成品 HTML”可下载音频已内嵌的单文件分享版。
 不要把 .env 或任何真实 API Key 提交到 Git。

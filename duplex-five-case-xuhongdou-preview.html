@@ -547,6 +547,15 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
 .aw-prompt-grid .aw-field-wide { grid-column:span 2; }
 .aw-field-hint { color:var(--ink-mute); font-size:9px; font-weight:300; }
 .aw-prompt-grid textarea { min-height:48px; }
+.aw-response-panel { grid-column:1 / -1; display:grid; gap:8px; padding:10px 0 2px; border-top:1px solid var(--line); }
+.aw-response-title { display:flex; align-items:baseline; gap:8px; color:var(--ink-dim); font-size:10.5px; }
+.aw-response-title small { color:var(--ink-mute); font-size:9.5px; }
+.aw-response-grid { display:grid; grid-template-columns:minmax(240px,2fr) minmax(120px,1fr) auto; gap:8px 12px; align-items:end; }
+.aw-response-grid .aw-field { min-width:0; }
+.aw-response-grid select, .aw-response-grid input { min-width:0; }
+.aw-response-status { color:var(--ink-mute); font-size:10px; line-height:1.4; }
+.aw-response-status.ready { color:#9ce0c2; }
+.aw-response-status.pending { color:#f6cd8f; }
 .aw-save-state { min-width:78px; color:var(--ink-mute); font-size:10px; white-space:nowrap; text-align:center; }
 .aw-save-state[data-state="saved"] { color:#9ed9bd; }
 .aw-save-state[data-state="error"] { color:#f0a6a6; }
@@ -572,6 +581,9 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
   .aw-tts-actions .aw-btn { grid-column:auto; flex:1; }
   .aw-prompt-grid { grid-template-columns:1fr 1fr; }
   .aw-prompt-grid .aw-field-wide { grid-column:1 / -1; }
+  .aw-response-grid { grid-template-columns:1fr 1fr; }
+  .aw-response-grid .aw-response-action,
+  .aw-response-grid .aw-response-status { grid-column:1 / -1; }
   .aw-mix-panel { grid-template-columns:1fr 1fr; }
   .aw-mix-field:first-child { grid-column:1 / -1; }
   .aw-mix-actions { grid-column:1 / -1; }
@@ -1120,7 +1132,7 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
       <div class="aw-editor-title"><span>标注属性</span><b id="awSelectedLabel">未选择标注</b></div>
       <div class="aw-editor-empty" id="awEditorEmpty">点击标注进行编辑；在轨道空白处拖动即可新建。</div>
     </div>
-    <div class="aw-help">空白处拖动 = 新建区间 · 段身拖动 = 移动 · 拖两端 = 裁剪实际声音 · 语音段包络点上下拖动 = 调整音量，左右标记 = 淡入/末尾渐弱 · 决策点/硬件轨点击 = 新增 point · 空格播放 · Delete 删除选中项 · 删除语音段会同时移除对应声音 · Ctrl/Command + Z 撤销</div>
+    <div class="aw-help">空白处拖动 = 新建区间 · 段身拖动 = 移动 · 拖两端 = 裁剪实际声音 · 助手段可绑定用户语音并设置响应间隔 · 语音段包络点上下拖动 = 调整音量，左右标记 = 淡入/末尾渐弱 · 决策点/硬件轨点击 = 新增 point · 空格播放 · Delete 删除选中项 · 删除语音段会同时移除对应声音 · Ctrl/Command + Z 撤销</div>
   </section>
 
 
@@ -1229,6 +1241,15 @@ function clampTtsVolume(value) {
 function normalizeTtsNormalization(value) {
   return String(value || '').toLowerCase() === 'enhanced' ? 'enhanced' : 'standard';
 }
+const RESPONSE_GAP_DEFAULT_MS = 400;
+const RESPONSE_GAP_MAX_MS = 5000;
+function clampResponseGapMs(value) {
+  if (value === '' || value == null) return RESPONSE_GAP_DEFAULT_MS;
+  const number = Number(value);
+  return Number.isFinite(number)
+    ? Math.min(RESPONSE_GAP_MAX_MS, Math.max(0, Math.round(number)))
+    : RESPONSE_GAP_DEFAULT_MS;
+}
 
 function buildGeneratedAnnotations(scene) {
   const voice = scene.lines.map(line => ({
@@ -1240,7 +1261,8 @@ function buildGeneratedAnnotations(scene) {
     ttsVoice:scene.voice || line.ttsVoice || '',
     ttsSpeed:clampTtsSpeed(line.speed ?? scene.speed ?? 1),
     ttsVolume:clampTtsVolume(line.volume ?? scene.volume ?? 1),
-    ttsTextNormalization:normalizeTtsNormalization(line.textNormalization || scene.textNormalization || 'standard')
+    ttsTextNormalization:normalizeTtsNormalization(line.textNormalization || scene.textNormalization || 'standard'),
+    ...(['assistant', 'assistant_backchannel'].includes(line.role) ? { responseGapMs:RESPONSE_GAP_DEFAULT_MS, responseAnchorId:'' } : {})
   }));
   return [...voice, ...(scene.extraAnnotations || [])];
 }
@@ -4762,7 +4784,17 @@ const annotationWorkbench = (() => {
         normalized.gainDb = Math.min(12, Math.max(-60, Number(normalized.gainDb) || 0));
         normalized.fadeIn = Math.min(duration, Math.max(0, Number(normalized.fadeIn) || 0));
         normalized.fadeOut = Math.min(duration, Math.max(0, Number(normalized.fadeOut) || 0));
+        if (normalized.track === 'assistant') {
+          normalized.responseAnchorId = String(normalized.responseAnchorId || '');
+          normalized.responseGapMs = clampResponseGapMs(normalized.responseGapMs);
+        }
         return normalized;
+      });
+      const userSegmentIds = new Set(scene.segments.filter(item => item.track === 'user').map(item => item.id));
+      scene.segments.forEach(item => {
+        if (item.track === 'assistant' && item.responseAnchorId && !userSegmentIds.has(item.responseAnchorId)) {
+          item.responseAnchorId = '';
+        }
       });
       /* 任务执行音只能在实际任务区间播放；清理旧版本误存的全局任务音段。 */
       const fullDuration = Number(META[sceneId]?.duration) || 0;
@@ -4873,6 +4905,78 @@ const annotationWorkbench = (() => {
   function scene() { return data[caseId]; }
   function meta() { return META[caseId]; }
   function selected() { return scene().segments.find(item => item.id === selectedId); }
+  function responseUserSegments(targetScene = scene()) {
+    return (targetScene?.segments || [])
+      .filter(item => item.track === 'user' && Number(item.end) > Number(item.start))
+      .sort((a, b) => Number(a.start) - Number(b.start) || Number(a.end) - Number(b.end));
+  }
+  function inferredResponseAnchor(item, targetScene = scene()) {
+    return responseUserSegments(targetScene)
+      .filter(candidate => candidate.id !== item.id && Number(candidate.end) <= Number(item.start) + 0.001)
+      .sort((a, b) => Number(b.end) - Number(a.end))[0] || null;
+  }
+  function responseAnchorFor(item, targetScene = scene()) {
+    if (!item) return null;
+    return (targetScene?.segments || []).find(candidate =>
+      candidate.id === item.responseAnchorId && candidate.track === 'user'
+    ) || null;
+  }
+  function responseConfigFor(item, targetScene = scene()) {
+    const anchor = responseAnchorFor(item, targetScene) || inferredResponseAnchor(item, targetScene);
+    const actualGapMs = anchor
+      ? Math.round((Number(item.start) - Number(anchor.end)) * 1000)
+      : null;
+    return {
+      anchor,
+      gapMs:clampResponseGapMs(item?.responseGapMs),
+      actualGapMs,
+      applied:!!responseAnchorFor(item, targetScene)
+    };
+  }
+  function applyResponseTiming(item, anchorId = item?.responseAnchorId, gapValue = item?.responseGapMs, targetScene = scene(), targetMeta = meta()) {
+    if (!item || item.track !== 'assistant') return false;
+    const anchor = (targetScene?.segments || []).find(candidate =>
+      candidate.id === anchorId && candidate.track === 'user'
+    );
+    if (!anchor) return false;
+    const gapMs = clampResponseGapMs(gapValue);
+    const duration = Math.max(0.05, Number(item.end) - Number(item.start));
+    const nextStart = Math.max(0, Number(anchor.end) + gapMs / 1000);
+    const nextEnd = nextStart + duration;
+    if (nextEnd > targetMeta.duration) targetMeta.duration = Number(nextEnd.toFixed(3));
+    targetScene.timelineDuration = Math.max(Number(targetScene.timelineDuration) || 0, targetMeta.duration, nextEnd);
+    const changed = item.responseAnchorId !== anchor.id
+      || item.responseGapMs !== gapMs
+      || Math.abs(Number(item.start) - nextStart) > 0.0005
+      || Math.abs(Number(item.end) - nextEnd) > 0.0005;
+    item.responseAnchorId = anchor.id;
+    item.responseGapMs = gapMs;
+    item.start = Number(nextStart.toFixed(3));
+    item.end = Number(nextEnd.toFixed(3));
+    return changed;
+  }
+  function updateResponseGapFromStart(item, targetScene = scene()) {
+    const anchor = responseAnchorFor(item, targetScene);
+    if (!anchor) return;
+    item.responseGapMs = clampResponseGapMs((Number(item.start) - Number(anchor.end)) * 1000);
+  }
+  function syncResponseTimingForAnchor(anchorId, targetScene = scene(), targetMeta = meta()) {
+    if (!anchorId) return false;
+    let changed = false;
+    (targetScene?.segments || [])
+      .filter(item => item.track === 'assistant' && item.responseAnchorId === anchorId)
+      .forEach(item => { changed = applyResponseTiming(item, anchorId, item.responseGapMs, targetScene, targetMeta) || changed; });
+    return changed;
+  }
+  function clearResponseAnchorsForUser(anchorId, targetScene = scene()) {
+    if (!anchorId) return;
+    (targetScene?.segments || [])
+      .filter(item => item.track === 'assistant' && item.responseAnchorId === anchorId)
+      .forEach(item => {
+        item.responseAnchorId = '';
+        item.responseGapMs = RESPONSE_GAP_DEFAULT_MS;
+      });
+  }
   function snapshotScene() { return JSON.parse(JSON.stringify(scene())); }
   function pushHistoryFor(id, snapshot) {
     const stack = history[id];
@@ -5010,7 +5114,10 @@ const annotationWorkbench = (() => {
       const envelopeHandles = isVoice && item.id === selectedId
         ? `<span class="envelope-handle gain" data-envelope-handle="gain" style="left:50%;top:${gainY.toFixed(1)}%" title="拖动调整片段音量"></span><span class="envelope-handle fade-in" data-envelope-handle="fadeIn" style="left:${fadeInX.toFixed(2)}%" title="拖动调整淡入"></span><span class="envelope-handle fade-out" data-envelope-handle="fadeOut" style="left:${fadeOutX.toFixed(2)}%" title="拖动调整末尾渐弱"></span>`
         : '';
-      const mixTitle = isVoice ? ` · ${gainDb > 0 ? '+' : ''}${gainDb.toFixed(0)}dB · 淡入 ${fadeIn.toFixed(2)}s · 末尾渐弱 ${fadeOut.toFixed(2)}s` : '';
+      const responseTitle = item.track === 'assistant' && item.responseAnchorId
+        ? ` · 响应 ${clampResponseGapMs(item.responseGapMs)}ms`
+        : '';
+      const mixTitle = isVoice ? `${responseTitle} · ${gainDb > 0 ? '+' : ''}${gainDb.toFixed(0)}dB · 淡入 ${fadeIn.toFixed(2)}s · 末尾渐弱 ${fadeOut.toFixed(2)}s` : '';
       el.className = `aw-segment ${TRACK_CLASSES[item.track] || 'world'}${item.id === selectedId ? ' selected' : ''}`;
       el.style.left = (item.start * pxPerSec) + 'px';
       el.style.width = Math.max(8, (item.end - item.start) * pxPerSec) + 'px';
@@ -5036,7 +5143,7 @@ const annotationWorkbench = (() => {
 
   function renderEditor() {
     const editor = $('#awEditor');
-    editor.querySelectorAll('.aw-field, .aw-editor-actions, .aw-tts-panel, .aw-mix-panel, .aw-prompt-panel').forEach(el => el.remove());
+    editor.querySelectorAll('.aw-field, .aw-editor-actions, .aw-tts-panel, .aw-mix-panel, .aw-prompt-panel, .aw-response-panel').forEach(el => el.remove());
     const empty = $('#awEditorEmpty');
     const item = selected();
     $('#awSelectedLabel').textContent = item ? `${TRACK_LABELS[item.track] || '自定义层'} · ${item.id}` : '未选择标注';
@@ -5057,6 +5164,22 @@ const annotationWorkbench = (() => {
     const ttsSpeed = clampTtsSpeed(item.ttsSpeed);
     const ttsVolume = clampTtsVolume(item.ttsVolume);
     const ttsTextNormalization = normalizeTtsNormalization(item.ttsTextNormalization);
+    const isAssistantVoice = item.track === 'assistant';
+    const responseConfig = isAssistantVoice ? responseConfigFor(item) : null;
+    const responseUsers = isAssistantVoice ? responseUserSegments() : [];
+    const responseAnchorId = responseConfig?.anchor?.id || '';
+    const responseOptions = responseUsers.length
+      ? `<option value="">不绑定（手动定位）</option>${responseUsers.map(candidate => {
+        const label = `${String(candidate.text || candidate.type || '用户语音').slice(0, 48)} · ${candidate.start.toFixed(2)}-${candidate.end.toFixed(2)}s`;
+        return `<option value="${escapeHtml(candidate.id)}"${candidate.id === responseAnchorId ? ' selected' : ''}>${escapeHtml(label)}</option>`;
+      }).join('')}`
+      : '<option value="">暂无用户语音</option>';
+    const responseStatus = responseConfig?.anchor
+      ? `${responseConfig.applied ? '已绑定' : '推断上一句'} · 当前约 ${responseConfig.actualGapMs ?? 0}ms`
+      : '选择用户语音后按间隔定位';
+    const responseStatusClass = responseConfig?.anchor
+      ? (responseConfig.applied ? 'ready' : 'pending')
+      : '';
     editor.insertAdjacentHTML('beforeend', `
       <div class="aw-field"><label>类目</label><select data-field="type">${typeOptions}</select></div>
       <div class="aw-field"><label>开始 / s</label><input data-field="start" type="number" min="0" max="${meta().duration}" step="0.05" value="${item.start.toFixed(2)}"></div>
@@ -5064,6 +5187,15 @@ const annotationWorkbench = (() => {
       <div class="aw-field"><label>来源</label><input data-field="source" value="${escapeHtml(item.source)}"></div>
       <div class="aw-field" style="grid-column:1 / -2"><label>标注内容</label><textarea data-field="text">${escapeHtml(item.text)}</textarea></div>
       <button class="aw-btn aw-editor-actions" id="awDelete" type="button">${isVoice ? '删除语音和标注' : '删除标注'}</button>
+      ${isAssistantVoice ? `<div class="aw-response-panel">
+        <div class="aw-response-title"><span>Agent 响应时机</span><small>按用户语音结束时间计算开口间隔</small></div>
+        <div class="aw-response-grid">
+          <div class="aw-field"><label>跟随用户语音</label><select data-response-field="anchor"${responseUsers.length ? '' : ' disabled'}>${responseOptions}</select></div>
+          <div class="aw-field"><label>响应间隔 / ms <span class="aw-field-hint">0-5000</span></label><input data-response-field="gap" type="number" min="0" max="${RESPONSE_GAP_MAX_MS}" step="10" value="${responseConfig.gapMs}"></div>
+          <button class="aw-btn aw-response-action" id="awApplyResponse" type="button"${responseConfig?.anchor ? '' : ' disabled'}>按间隔对齐</button>
+          <span class="aw-response-status ${responseStatusClass}" id="awResponseStatus">${escapeHtml(responseStatus)}</span>
+        </div>
+      </div>` : ''}
       ${isTtsVoice ? `<div class="aw-prompt-panel">
         <div class="aw-prompt-title"><span>TTS 配置</span><small>修改后点击“生成并替换”才会写入新音频</small></div>
         <div class="aw-prompt-grid">
@@ -5131,10 +5263,39 @@ const annotationWorkbench = (() => {
           item.fadeIn = clamp(Number(item.fadeIn) || 0, 0, duration);
           item.fadeOut = clamp(Number(item.fadeOut) || 0, 0, duration);
         }
+        if (input.dataset.field === 'start' && item.track === 'assistant') updateResponseGapFromStart(item);
+        if ((input.dataset.field === 'start' || input.dataset.field === 'end') && item.track === 'user') {
+          syncResponseTimingForAnchor(item.id);
+        }
         if (JSON.stringify(before) !== JSON.stringify(scene())) pushHistory(before);
         persist(); render();
       });
     });
+    if (isAssistantVoice) {
+      const anchorInput = editor.querySelector('[data-response-field="anchor"]');
+      const gapInput = editor.querySelector('[data-response-field="gap"]');
+      const applyButton = editor.querySelector('#awApplyResponse');
+      const applyResponse = () => {
+        const before = snapshotScene();
+        const anchorId = String(anchorInput?.value || '');
+        const gapMs = clampResponseGapMs(gapInput?.value);
+        if (gapInput) gapInput.value = String(gapMs);
+        let changed = false;
+        if (anchorId) {
+          changed = applyResponseTiming(item, anchorId, gapMs) || changed;
+        } else {
+          changed = item.responseAnchorId !== '' || item.responseGapMs !== gapMs;
+          item.responseAnchorId = '';
+          item.responseGapMs = gapMs;
+        }
+        if (changed) pushHistory(before);
+        persist();
+        render();
+      };
+      anchorInput?.addEventListener('change', applyResponse);
+      gapInput?.addEventListener('change', applyResponse);
+      applyButton?.addEventListener('click', applyResponse);
+    }
     if (isTtsVoice) {
       const ttsFieldMap = {
         instruction:'ttsInstruction',
@@ -5404,6 +5565,9 @@ const annotationWorkbench = (() => {
         target.fadeIn = clamp(Number(target.fadeIn) || 0, 0, updatedDuration);
         target.fadeOut = clamp(Number(target.fadeOut) || 0, 0, updatedDuration);
       }
+      if (target.responseAnchorId) {
+        applyResponseTiming(target, target.responseAnchorId, target.responseGapMs);
+      }
       pushHistoryFor(requestCaseId, before);
       persist();
     } catch (error) {
@@ -5422,7 +5586,11 @@ const annotationWorkbench = (() => {
       event.preventDefault();
       const before = snapshotScene();
       const start = timeFromEvent(event, track);
-      const draft = { id:makeId(track.dataset.track), track:track.dataset.track, start, end:start, type:typeFor(track.dataset.track), text:'新标注', source:'', mediaIn:0 };
+      const draft = {
+        id:makeId(track.dataset.track), track:track.dataset.track, start, end:start,
+        type:typeFor(track.dataset.track), text:'新标注', source:'', mediaIn:0,
+        ...(track.dataset.track === 'assistant' ? { responseAnchorId:'', responseGapMs:RESPONSE_GAP_DEFAULT_MS } : {})
+      };
       const originX = event.clientX;
       const move = e => { draft.end = timeFromEvent(e, track); drawDraft(track, draft); };
       const up = e => {
@@ -5433,6 +5601,10 @@ const annotationWorkbench = (() => {
         if (!moved && ['world','decisions','hardware','task','taskAudio'].includes(draft.track)) draft.end = draft.start;
         else if (!moved) draft.end = snap(Math.min(meta().duration, draft.start + 1));
         if (moved && draft.end - draft.start < .15) draft.end = snap(Math.min(meta().duration, draft.start + .15));
+        if (draft.track === 'assistant') {
+          const anchor = inferredResponseAnchor(draft);
+          if (anchor) applyResponseTiming(draft, anchor.id, RESPONSE_GAP_DEFAULT_MS);
+        }
         pushHistory(before);
         scene().segments.push(draft); selectedId = draft.id; persist(); render();
       };
@@ -5490,10 +5662,14 @@ const annotationWorkbench = (() => {
         item.start = snap(clamp(original.start + delta, 0, meta().duration - length));
         item.end = snap(item.start + length);
       }
+      if (item.track === 'assistant' && item.responseAnchorId) updateResponseGapFromStart(item);
+      if (item.track === 'user') syncResponseTimingForAnchor(item.id);
       render();
     };
     const up = () => {
       document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up);
+      if (item.track === 'assistant' && item.responseAnchorId) updateResponseGapFromStart(item);
+      if (item.track === 'user') syncResponseTimingForAnchor(item.id);
       if (JSON.stringify(before) !== JSON.stringify(scene())) pushHistory(before);
       persist(); render();
     };
@@ -5505,6 +5681,7 @@ const annotationWorkbench = (() => {
     if (resume) pause();
     const before = snapshotScene();
     const item = selected();
+    if (item?.track === 'user') clearResponseAnchorsForUser(item.id);
     if (item && ['user','assistant','third_party','other'].includes(item.track) && item.end - item.start >= .08) addMutedRange(item);
     scene().segments = scene().segments.filter(item => item.id !== selectedId);
     selectedId = null; pushHistory(before); persist(); render();
@@ -5773,6 +5950,21 @@ const annotationWorkbench = (() => {
       };
     });
     const segmentItems = scene().segments;
+    const responseTiming = segmentItems
+      .filter(item => item.track === 'assistant' && item.responseAnchorId)
+      .map(item => {
+        const anchor = responseAnchorFor(item);
+        if (!anchor) return null;
+        return {
+          assistant_segment_id:item.id,
+          user_segment_id:anchor.id,
+          gap_ms:clampResponseGapMs(item.responseGapMs),
+          user_end_s:Number(Number(anchor.end).toFixed(3)),
+          assistant_start_s:Number(Number(item.start).toFixed(3)),
+          assistant_end_s:Number(Number(item.end).toFixed(3))
+        };
+      })
+      .filter(Boolean);
     const idForLine = key => lines.find(line => line.key === key)?.utt_id || null;
     const effectiveLineEnd = line => {
       const originalEnd = line.start + line.duration;
@@ -5895,6 +6087,7 @@ const annotationWorkbench = (() => {
       context:{ realtime_window:[], session_state:[], memory:{ store:'metadata/memory_store/user_u001.json', used_refs:[] } },
       scene_timeline:[{ scene_card_id:`${caseId}-scene-001`, scene:metaInfo.label, state:'duplex', confidence:'certain', start_s:0, end_s:null, evidence_refs:worldSignals.map(signal => signal.signal_id) }],
       world_signals:worldSignals, utterances, pauses, events:taskEvents, decision_points:decisionPoints, hardware_actions:hardwareActions,
+      response_timing:responseTiming,
       audio_tracks:{
         background:extraVoiceSegments.filter(item => item.track === 'background').map(item => ({ id:item.id, start_s:item.start, end_s:item.end, audio_key:item.audioKey || item.source || null, label:item.text || item.type })),
         other_voices:extraVoiceSegments.filter(item => item.track === 'other').map(item => ({ id:item.id, start_s:item.start, end_s:item.end, audio_key:item.audioKey || item.source || null, speaker:item.text || item.type })),
@@ -5997,6 +6190,9 @@ const annotationWorkbench = (() => {
       targetScene.timelineDuration = Math.max(Number(targetScene.timelineDuration) || 0, META[targetId].duration);
       item.fadeIn = clamp(Number(item.fadeIn) || 0, 0, item.end - item.start);
       item.fadeOut = clamp(Number(item.fadeOut) || 0, 0, item.end - item.start);
+    }
+    if (item.track === 'assistant' && item.responseAnchorId) {
+      applyResponseTiming(item, item.responseAnchorId, item.responseGapMs, targetScene, META[targetId]);
     }
     registerGeneratedSource(item);
     if (JSON.stringify(before) !== JSON.stringify(targetScene)) pushHistoryFor(targetId, before);

@@ -48,7 +48,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u2",
@@ -82,7 +84,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u3",
@@ -116,7 +120,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_a4",
@@ -136,7 +142,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u4",
@@ -198,7 +206,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u7",
@@ -232,7 +242,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_a7",
@@ -252,7 +264,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u8",
@@ -286,7 +300,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u9",
@@ -320,7 +336,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u10",
@@ -354,7 +372,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u11",
@@ -388,7 +408,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_a12",
@@ -408,7 +430,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u12",
@@ -442,7 +466,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       },
       {
         "id": "wind-will-remember-xhd_u13",
@@ -476,7 +502,9 @@
         "ttsVoice": "lengyanyujie",
         "ttsSpeed": 1,
         "ttsVolume": 1,
-        "ttsTextNormalization": "standard"
+        "ttsTextNormalization": "standard",
+        "responseAnchorId": "",
+        "responseGapMs": 400
       }
     ],
     "audioEdits": {

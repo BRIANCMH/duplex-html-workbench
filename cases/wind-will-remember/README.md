@@ -20,6 +20,7 @@ Case ID：`GC-EMO-003`
 - `source/scene-data.json`：台词、时间轴、Inline 提示词。
 - `source/tts-manifest.json`：生成参数、时长和字幕信息。
 - `source/rain-attribution.txt`：雨声来源和公共领域声明。
+- 助手音轨可在标注编辑器中绑定某句用户语音，并用 `responseGapMs` 设置响应间隔（默认建议 `400ms`）。
 
 ## 重新生成
 
