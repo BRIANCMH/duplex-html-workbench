@@ -1,0 +1,512 @@
+{
+  "caseId": "wind-will-remember",
+  "model": "stepaudio-2.5-tts",
+  "voice": "lengyanyujie",
+  "voiceLabel": "冷艳御姐",
+  "sampleRate": 24000,
+  "loudnessTarget": "-18 LUFS",
+  "globalInstruction": "现代都市夜雨中的情绪陪伴对话。成熟清冷的女性 Amoo，音色低亮度、干净，有可靠感，不甜不媚、不高傲、不带播音腔。情绪从低声关心和尊重边界，逐步转为稳妥接管事务；关键一句坚定但不高，结尾放轻。意图是承接情绪、清楚交付任务并保留决定权。",
+  "generatedAt": "2026-09-02T03:16:01.469Z",
+  "lines": [
+    {
+      "key": "xhd_a1",
+      "text": "在，外面好像下雨了，你最近有点感冒，记得多穿点",
+      "inline": "(成熟清冷，声音低而柔，带一点夜雨里的关心；句尾轻轻收住)",
+      "inputChars": 52,
+      "start": 8.335,
+      "scriptedEnd": 15.436,
+      "scriptedDuration": 7.101,
+      "generatedDuration": 5.96,
+      "speed": 1,
+      "audio": "audio/01-xhd_a1.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a2",
+      "text": "我感觉你可能需要一个人和你一起说说话，你可能又想起她了，要是现在很难受可以和我说说",
+      "inline": "(克制地靠近，不分析，不逼问；声音清冷但有温度，轻声说)",
+      "inputChars": 69,
+      "start": 24.035,
+      "scriptedEnd": 29.592,
+      "scriptedDuration": 5.557,
+      "generatedDuration": 8.68,
+      "speed": 1,
+      "audio": "audio/02-xhd_a2.wav",
+      "subtitles": [
+        {
+          "text": "(克制地靠近，不分析，不逼问；声音清冷但有温度，轻声说)我感觉你可能需要一个人和你一起说说话，你可能又想起她了，要是现在很难受可以和我说说。",
+          "request_id": "2c5e3b38a63f4c51349e1696bc53a7ce-0",
+          "items": [
+            {
+              "text": "(克",
+              "start_time": 320,
+              "end_time": 480
+            },
+            {
+              "text": "制",
+              "start_time": 640,
+              "end_time": 1280
+            },
+            {
+              "text": "地",
+              "start_time": 1440,
+              "end_time": 1600
+            },
+            {
+              "text": "靠",
+              "start_time": 1600,
+              "end_time": 1760
+            },
+            {
+              "text": "近，",
+              "start_time": 1760,
+              "end_time": 1920
+            },
+            {
+              "text": "不",
+              "start_time": 1920,
+              "end_time": 1920
+            },
+            {
+              "text": "分",
+              "start_time": 1920,
+              "end_time": 1920
+            },
+            {
+              "text": "析，",
+              "start_time": 1920,
+              "end_time": 2080
+            },
+            {
+              "text": "不",
+              "start_time": 2080,
+              "end_time": 2080
+            },
+            {
+              "text": "逼",
+              "start_time": 2160,
+              "end_time": 2240
+            },
+            {
+              "text": "问；",
+              "start_time": 2240,
+              "end_time": 2240
+            },
+            {
+              "text": "声",
+              "start_time": 2240,
+              "end_time": 2800
+            },
+            {
+              "text": "音",
+              "start_time": 2800,
+              "end_time": 2880
+            },
+            {
+              "text": "清",
+              "start_time": 2960,
+              "end_time": 3200
+            },
+            {
+              "text": "冷",
+              "start_time": 3600,
+              "end_time": 3760
+            },
+            {
+              "text": "但",
+              "start_time": 4560,
+              "end_time": 4560
+            },
+            {
+              "text": "有",
+              "start_time": 4640,
+              "end_time": 4720
+            },
+            {
+              "text": "温",
+              "start_time": 4880,
+              "end_time": 5040
+            },
+            {
+              "text": "度，",
+              "start_time": 5040,
+              "end_time": 5040
+            },
+            {
+              "text": "轻",
+              "start_time": 5120,
+              "end_time": 5440
+            },
+            {
+              "text": "声",
+              "start_time": 5440,
+              "end_time": 5440
+            },
+            {
+              "text": "说)",
+              "start_time": 5520,
+              "end_time": 5760
+            },
+            {
+              "text": "我",
+              "start_time": 5760,
+              "end_time": 5760
+            },
+            {
+              "text": "感",
+              "start_time": 5760,
+              "end_time": 5760
+            },
+            {
+              "text": "觉",
+              "start_time": 6100,
+              "end_time": 6440
+            },
+            {
+              "text": "你",
+              "start_time": 6780,
+              "end_time": 7120
+            },
+            {
+              "text": "可",
+              "start_time": 7120,
+              "end_time": 7200
+            },
+            {
+              "text": "能",
+              "start_time": 7200,
+              "end_time": 7200
+            },
+            {
+              "text": "需",
+              "start_time": 7440,
+              "end_time": 7440
+            },
+            {
+              "text": "要",
+              "start_time": 7440,
+              "end_time": 7840
+            },
+            {
+              "text": "一",
+              "start_time": 7840,
+              "end_time": 8320
+            },
+            {
+              "text": "个",
+              "start_time": 8320,
+              "end_time": 8480
+            },
+            {
+              "text": "人",
+              "start_time": 8480,
+              "end_time": 8640
+            },
+            {
+              "text": "和",
+              "start_time": 8960,
+              "end_time": 8960
+            },
+            {
+              "text": "你",
+              "start_time": 8960,
+              "end_time": 8960
+            },
+            {
+              "text": "一",
+              "start_time": 8960,
+              "end_time": 8960
+            },
+            {
+              "text": "起",
+              "start_time": 8960,
+              "end_time": 8960
+            },
+            {
+              "text": "说",
+              "start_time": 8960,
+              "end_time": 9120
+            },
+            {
+              "text": "说",
+              "start_time": 9120,
+              "end_time": 9120
+            },
+            {
+              "text": "话，",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "你",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "可",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "能",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "又",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "想",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "起",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "她",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "了，",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "要",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "是",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "现",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "在",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "很",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "难",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "受",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "可",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "以",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "和",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "我",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "说",
+              "start_time": 9240,
+              "end_time": 9240
+            },
+            {
+              "text": "说。",
+              "start_time": 9240,
+              "end_time": 9240
+            }
+          ],
+          "timestamp": 1788290211204
+        }
+      ],
+      "note": "slower version selected after review; original 5.407s fit replaced with 8.680s natural-speed take"
+    },
+    {
+      "key": "xhd_a3",
+      "text": "好，我绝对不说这个",
+      "inline": "(短促、明确、没有辩解；清冷的声音里带一点安抚)",
+      "inputChars": 33,
+      "start": 37.53,
+      "scriptedEnd": 41.698,
+      "scriptedDuration": 4.168,
+      "generatedDuration": 2.32,
+      "speed": 1,
+      "audio": "audio/03-xhd_a3.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a4",
+      "text": "你可能只是还需要一点时间，重新适应没有她的——",
+      "inline": "(声音更轻，像在试着接住对方；说到“没有她的”时停住，让破折号自然悬着)",
+      "inputChars": 59,
+      "start": 41.698,
+      "scriptedEnd": 48.798,
+      "scriptedDuration": 7.1,
+      "generatedDuration": 5.36,
+      "speed": 1,
+      "audio": "audio/04-xhd_a4.wav",
+      "subtitles": [],
+      "postProcess": {
+        "replaced": "short-inline-retry",
+        "reason": "remove spoken inline instruction leakage"
+      }
+    },
+    {
+      "key": "xhd_a5",
+      "text": "好，那这件事你就不要操心了，我去帮你回北京的订票，还是选你喜欢做的靠窗",
+      "inline": "(温柔而干练，先安抚再交代事情；“不要操心”轻轻加重，不像命令)",
+      "inputChars": 67,
+      "start": 67.155,
+      "scriptedEnd": 77.96,
+      "scriptedDuration": 10.805,
+      "generatedDuration": 7.16,
+      "speed": 1,
+      "audio": "audio/05-xhd_a5.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a6",
+      "text": "会议纪要你也不用担心，我也会帮你搞定，等你后面有空再看",
+      "inline": "(稳定、可靠、低声；把承诺说得具体，句尾自然落下)",
+      "inputChars": 52,
+      "start": 86.56,
+      "scriptedEnd": 94.895,
+      "scriptedDuration": 8.335,
+      "generatedDuration": 5.04,
+      "speed": 1,
+      "audio": "audio/06-xhd_a6.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a7",
+      "text": "雨好像下更大了，你要是在外面的话，不要被浇到",
+      "inline": "(先听见雨声变大，再轻声提醒；关心明显但不过度，声音保持在人声前景)",
+      "inputChars": 56,
+      "start": 94.895,
+      "scriptedEnd": 102.304,
+      "scriptedDuration": 7.409,
+      "generatedDuration": 4.92,
+      "speed": 1,
+      "audio": "audio/07-xhd_a7.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a8",
+      "text": "那你是想去大理吗，你和Mia之前说过要去大理，有一个非常小众的民宿，没什么人",
+      "inline": "(记起共同约定时稍微放柔，仍然清冷克制；“没什么人”轻轻收尾)",
+      "inputChars": 69,
+      "start": 108.92,
+      "scriptedEnd": 120.65,
+      "scriptedDuration": 11.73,
+      "generatedDuration": 7.52,
+      "speed": 1,
+      "audio": "audio/08-xhd_a8.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a9",
+      "text": "可以，下周工作日历是空的，没有什么紧急的工作，可以请个假去散散心。你最近太不开心了，不要再想工作的事情了，给自己放个假",
+      "inline": "(温柔地给出空间，不强行振作；前半句平静承接，后半句带一点坚定的保护)",
+      "inputChars": 94,
+      "start": 124.123,
+      "scriptedEnd": 138.015,
+      "scriptedDuration": 13.892,
+      "generatedDuration": 11.44,
+      "speed": 1,
+      "audio": "audio/09-xhd_a9.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a10",
+      "text": "那我帮你搜一搜去合适的机票和酒店",
+      "inline": "(进入执行状态，语气简洁、自然；像已经开始处理，不拖长，不兴奋)",
+      "inputChars": 48,
+      "start": 144.3,
+      "scriptedEnd": 151.092,
+      "scriptedDuration": 6.792,
+      "generatedDuration": 3.56,
+      "speed": 1,
+      "audio": "audio/10-xhd_a10.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a11",
+      "text": "好～，现在需要你确认一下行程信息，并完成支付",
+      "inline": "(短促确认，清冷声线里露出一点轻松；“好～”不要撒娇，行程信息说清楚)",
+      "inputChars": 57,
+      "start": 154.564,
+      "scriptedEnd": 161.356,
+      "scriptedDuration": 6.792,
+      "generatedDuration": 4.24,
+      "speed": 1,
+      "audio": "audio/11-xhd_a11.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a12",
+      "text": "会议纪要晚一点我会提醒你查看，现在先去收拾去大理的行李吧",
+      "inline": "(像顺手替她记住一件事，声音低、稳、可靠；结尾把注意力轻轻引向收拾行李)",
+      "inputChars": 64,
+      "start": 161.356,
+      "scriptedEnd": 170,
+      "scriptedDuration": 8.644,
+      "generatedDuration": 5.16,
+      "speed": 1,
+      "audio": "audio/12-xhd_a12.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a13",
+      "text": "不要想这么多啦，失去你爱的人，不代表要失去你爱的生活",
+      "inline": "(主动插话，语气坚定但不高；“不要”清楚加重，是保护不是命令；后半句温柔落下)",
+      "inputChars": 65,
+      "start": 176.8,
+      "scriptedEnd": 184.5,
+      "scriptedDuration": 7.7,
+      "generatedDuration": 5.44,
+      "speed": 1,
+      "audio": "audio/13-xhd_a13.wav",
+      "subtitles": []
+    },
+    {
+      "key": "xhd_a14",
+      "text": "好，先收拾东西，其他的明天再看",
+      "inline": "(疲惫后的温柔收口，声音轻而稳；不催促，只把今晚缩小到眼前一件事)",
+      "inputChars": 48,
+      "start": 190,
+      "scriptedEnd": 194,
+      "scriptedDuration": 4,
+      "generatedDuration": 3.84,
+      "speed": 1,
+      "audio": "audio/14-xhd_a14.wav",
+      "subtitles": []
+    }
+  ]
+}

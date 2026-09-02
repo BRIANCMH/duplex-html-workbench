@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>双工 HTML Workbench</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101417;--panel:#182025;--ink:#eef4f1;--muted:#9aa9a5;--line:#2b393c;--accent:#9ed9bd}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 0,#26363a 0,#101417 42%);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+    main{width:min(760px,calc(100% - 36px));margin:10vh auto;padding:34px;border:1px solid var(--line);border-radius:22px;background:rgba(24,32,37,.88);box-shadow:0 24px 80px #0006}h1{margin:0 0 8px;font-size:30px;font-weight:500}p{color:var(--muted)}.links{display:grid;gap:12px;margin:28px 0}.links a{display:block;padding:15px 18px;border:1px solid var(--line);border-radius:14px;color:var(--ink);text-decoration:none;background:#ffffff08}.links a:hover{border-color:var(--accent);background:#9ed9bd12}.links strong{display:block;color:var(--accent);font-weight:500}.note{font-size:13px;border-top:1px solid var(--line);padding-top:18px}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>双工 HTML Workbench</h1>
+    <p>可复用的双工语音标注、TTS 参数编辑、音轨编排与 Showcase 导出工程。</p>
+    <div class="links">
+      <a href="./demo.html"><strong>打开分享版 Demo</strong>风会替你记得 · 单文件 Showcase</a>
+      <a href="./duplex-five-case-xuhongdou-preview.html"><strong>打开编辑模板</strong>需要本地 Node 服务才能使用上传、录音和保存</a>
+      <a href="./README.md"><strong>阅读使用说明</strong>本地部署、音频库和导出流程</a>
+    </div>
+    <div class="note">分享版 Demo 可直接在浏览器打开；编辑能力请在本地运行 <code>node voice_editor_server.mjs</code>。</div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,22 @@
+四案例全双工模板 · macOS 启动说明
+
+从飞书下载并解压后，如果双击“启动模板.command”提示“已损坏”，这是 macOS 的下载隔离保护，不是文件损坏。
+
+请打开“终端”，执行（把路径替换成此文件夹的实际路径）：
+
+cd "/你的路径/duplex-four-case-template"
+xattr -dr com.apple.quarantine .
+chmod +x 启动模板.command && ./启动模板.command
+
+启动后访问：
+http://127.0.0.1:4179/duplex-four-case-template.html
+
+需要 Node.js 运行环境。仓库不包含任何真实 API Key。
+需要重新生成语音时，请复制 .env.example 为 .env，并在本机填写 STEP_API_KEY。
+音频统一保存在项目根目录的 audio-library/：
+  uploads/：上传文件和电脑录音
+  generated/：新生成的 TTS
+  reference/：已有参考音频
+音轨区支持拖动片段调整开口时码；点击“保存编辑”后写入 annotation-edits.json。
+使用“导出成品 HTML”可下载音频已内嵌的单文件分享版。
+不要把 .env 或任何真实 API Key 提交到 Git。

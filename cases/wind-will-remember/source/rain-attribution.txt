@@ -1,0 +1,8 @@
+Rain bed source
+
+File: Rain against the window.ogg
+Creator: cori
+Source: Wikimedia Commons
+License: Public domain
+Source URL: https://commons.wikimedia.org/wiki/File:Rain_against_the_window.ogg
+Downloaded for this local demo and processed into a 194-second mono MP3 with a low-level intensity envelope. The source remains public domain; the processed mix is a project derivative.

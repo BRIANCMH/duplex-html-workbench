@@ -1,0 +1,265 @@
+{
+  "caseId": "wind-will-remember",
+  "title": "风会替你记得",
+  "duration": 197.123,
+  "voice": "lengyanyujie",
+  "voiceLabel": "冷艳御姐",
+  "globalInstruction": "现代都市夜雨中的情绪陪伴对话。成熟清冷的女性 Amoo，音色低亮度、干净，有可靠感，不甜不媚、不高傲、不带播音腔。情绪从低声关心和尊重边界，逐步转为稳妥接管事务；关键一句坚定但不高，结尾放轻。意图是承接情绪、清楚交付任务并保留决定权。",
+  "lines": [
+    {
+      "key": "xhd_system_memory",
+      "role": "other",
+      "speaker": "历史语音",
+      "text": "等你有空了，咱们一起去大理",
+      "start": 0,
+      "end": 4.862,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_u1",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "在吗？",
+      "start": 4.862,
+      "end": 8.335,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a1",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "在，外面好像下雨了，你最近有点感冒，记得多穿点",
+      "start": 8.335,
+      "end": 15.436,
+      "inline": "(成熟清冷，声音低而柔，带一点夜雨里的关心；句尾轻轻收住)"
+    },
+    {
+      "key": "xhd_u2",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "我就是突然想起来，她以前说过，等有空了一起去大理",
+      "start": 15.436,
+      "end": 24.035,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a2",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "我感觉你可能需要一个人和你一起说说话，你可能又想起她了，要是现在很难受可以和我说说",
+      "start": 24.035,
+      "end": 32.715,
+      "inline": "(克制地靠近，不分析，不逼问；声音清冷但有温度，轻声说)",
+      "speed": 1
+    },
+    {
+      "key": "xhd_u3",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "不想说，而且你别跟我说什么“时间会治愈一切”  这种话，我也不想听了",
+      "start": 32.715,
+      "end": 40.653,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a3",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "好，我绝对不说这个",
+      "start": 40.653,
+      "end": 44.821,
+      "inline": "(短促、明确、没有辩解；清冷的声音里带一点安抚)"
+    },
+    {
+      "key": "xhd_a4",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "你可能只是还需要一点时间，重新适应没有她的——",
+      "start": 44.821,
+      "end": 51.921,
+      "inline": "(声音更轻，像在试着接住对方；说到“没有她的”时停住，让破折号自然悬着)"
+    },
+    {
+      "key": "xhd_u4",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "你也别分析我",
+      "start": 51.921,
+      "end": 55.394,
+      "audioKey": "xhd_silence",
+      "cutPrevious": true
+    },
+    {
+      "key": "xhd_u5",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "我就是不想听别人告诉我接下来应该怎么过",
+      "start": 55.394,
+      "end": 63.663,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_u6",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "诶....我明天还要飞回北京",
+      "start": 63.663,
+      "end": 70.278,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a5",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "好，那这件事你就不要操心了，我去帮你回北京的订票，还是选你喜欢做的靠窗",
+      "start": 70.278,
+      "end": 81.083,
+      "inline": "(温柔而干练，先安抚再交代事情；“不要操心”轻轻加重，不像命令)"
+    },
+    {
+      "key": "xhd_u7",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "还有会议纪要没有整理，下午就要发，这些都很烦！！",
+      "start": 81.083,
+      "end": 89.683,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a6",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "会议纪要你也不用担心，我也会帮你搞定，等你后面有空再看",
+      "start": 89.683,
+      "end": 98.018,
+      "inline": "(稳定、可靠、低声；把承诺说得具体，句尾自然落下)"
+    },
+    {
+      "key": "xhd_a7",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "雨好像下更大了，你要是在外面的话，不要被浇到",
+      "start": 98.018,
+      "end": 105.427,
+      "inline": "(先听见雨声变大，再轻声提醒；关心明显但不过度，声音保持在人声前景)"
+    },
+    {
+      "key": "xhd_u8",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "我没事，我只是想去一个没有人认识我的地方",
+      "start": 105.427,
+      "end": 112.043,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a8",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "那你是想去大理吗，你和Mia之前说过要去大理，有一个非常小众的民宿，没什么人",
+      "start": 112.043,
+      "end": 123.773,
+      "inline": "(记起共同约定时稍微放柔，仍然清冷克制；“没什么人”轻轻收尾)"
+    },
+    {
+      "key": "xhd_u9",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "你觉得可以吗？",
+      "start": 123.773,
+      "end": 127.246,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a9",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "可以，下周工作日历是空的，没有什么紧急的工作，可以请个假去散散心。你最近太不开心了，不要再想工作的事情了，给自己放个假",
+      "start": 127.246,
+      "end": 141.138,
+      "inline": "(温柔地给出空间，不强行振作；前半句平静承接，后半句带一点坚定的保护)"
+    },
+    {
+      "key": "xhd_u10",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "好，那去看看",
+      "start": 141.138,
+      "end": 147.423,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a10",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "那我帮你搜一搜去合适的机票和酒店",
+      "start": 147.423,
+      "end": 154.215,
+      "inline": "(进入执行状态，语气简洁、自然；像已经开始处理，不拖长，不兴奋)"
+    },
+    {
+      "key": "xhd_u11",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "好，那我们就去大理！",
+      "start": 154.215,
+      "end": 157.687,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a11",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "好～，现在需要你确认一下行程信息，并完成支付",
+      "start": 157.687,
+      "end": 164.479,
+      "inline": "(短促确认，清冷声线里露出一点轻松；“好～”不要撒娇，行程信息说清楚)"
+    },
+    {
+      "key": "xhd_a12",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "会议纪要晚一点我会提醒你查看，现在先去收拾去大理的行李吧",
+      "start": 164.479,
+      "end": 173.123,
+      "inline": "(像顺手替她记住一件事，声音低、稳、可靠；结尾把注意力轻轻引向收拾行李)"
+    },
+    {
+      "key": "xhd_u12",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "真的可以吗？我还要回北京上班，会议纪要下午也要发，我下周好像还有好多事……",
+      "start": 173.123,
+      "end": 181.123,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a13",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "不要想这么多啦，失去你爱的人，不代表要失去你爱的生活",
+      "start": 179.923,
+      "end": 187.623,
+      "inline": "(主动插话，语气坚定但不高；“不要”清楚加重，是保护不是命令；后半句温柔落下)",
+      "cutPrevious": true
+    },
+    {
+      "key": "xhd_u13",
+      "role": "user",
+      "speaker": "许红豆",
+      "text": "……好，那我先去收拾一下",
+      "start": 187.623,
+      "end": 193.123,
+      "audioKey": "xhd_silence"
+    },
+    {
+      "key": "xhd_a14",
+      "role": "assistant",
+      "speaker": "Amoo",
+      "text": "好，先收拾东西，其他的明天再看",
+      "start": 193.123,
+      "end": 197.123,
+      "inline": "(疲惫后的温柔收口，声音轻而稳；不催促，只把今晚缩小到眼前一件事)"
+    }
+  ]
+}

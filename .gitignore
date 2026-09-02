@@ -1,0 +1,32 @@
+.DS_Store
+.env
+
+# 当前四案例的音频已嵌入 clips.js / new-audio.js。
+# 原始生产音轨保留在本机，不进入轻量工程仓库。
+assets/audio/
+assets/annotation-workbench.css
+assets/annotation-workbench.js
+
+# 本地音频库与外发成品：由每台部署机独立维护，不进入源码仓库。
+audio-library/*
+!audio-library/README.md
+exports/
+
+assets/tts/*
+!assets/tts/clips.js
+!assets/tts/new-audio.js
+!assets/tts/wind-will-remember-audio.js
+
+*.raw.wav
+*.failed.wav
+*.failed.json
+
+source-docs/
+cases/wind-will-remember/source/alternates/
+cases/wind-will-remember/preview.png
+cases/wind-will-remember/*.png
+
+# Local annotation state and personal recordings stay on the deployment machine.
+annotation-edits.json
+cases/wind-will-remember/audio/user/
+cases/wind-will-remember/audio/user-normalized/
