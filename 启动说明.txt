@@ -12,7 +12,7 @@ chmod +x 启动模板.command && ./启动模板.command
 http://127.0.0.1:4179/duplex-four-case-template.html
 
 需要 Node.js 运行环境。仓库不包含任何真实 API Key。
-需要重新生成语音时，请复制 .env.example 为 .env，并在本机填写 STEP_API_KEY。
+启动脚本会自动读取本目录的 `.env`；如果本目录没有 `.env`，会自动读取同级主工程 `双工html雕花/.env` 中的 `STEP_API_KEY`。因此从主工程启动时无需重复填写。也可以复制 `.env.example` 为本目录 `.env` 覆盖默认来源。
 音频统一保存在项目根目录的 audio-library/：
   uploads/：上传文件和电脑录音
   generated/：新生成的 TTS

@@ -569,6 +569,18 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
 .aw-mix-actions .aw-btn { white-space:nowrap; }
 .aw-editor-empty { grid-column:1 / -1; color:var(--ink-mute); font-size:11px; padding:2px 0; }
 .aw-help { padding:0 16px 12px; color:var(--ink-mute); font-size:10.5px; line-height:1.5; }
+.aw-context-menu {
+  position:fixed; z-index:300; min-width:190px; padding:6px;
+  border:1px solid var(--line-strong); border-radius:10px;
+  background:#15191b; box-shadow:0 16px 38px rgba(0,0,0,.45);
+  display:none;
+}
+.aw-context-menu.show { display:grid; gap:3px; }
+.aw-context-menu button {
+  border:0; border-radius:6px; padding:8px 10px; text-align:left;
+  background:transparent; color:var(--ink-dim); font:300 11px inherit; cursor:pointer;
+}
+.aw-context-menu button:hover { background:rgba(255,255,255,.08); color:var(--ink); }
 @media (max-width:760px) {
   .aw-top { align-items:flex-start; flex-wrap:wrap; }
   .aw-actions { margin-left:0; width:100%; justify-content:flex-start; }
@@ -1132,8 +1144,15 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
       <div class="aw-editor-title"><span>标注属性</span><b id="awSelectedLabel">未选择标注</b></div>
       <div class="aw-editor-empty" id="awEditorEmpty">点击标注进行编辑；在轨道空白处拖动即可新建。</div>
     </div>
-    <div class="aw-help">空白处拖动 = 新建区间 · 段身拖动 = 移动 · 拖两端 = 裁剪实际声音 · 助手段可绑定用户语音并设置响应间隔 · 语音段包络点上下拖动 = 调整音量，左右标记 = 淡入/末尾渐弱 · 决策点/硬件轨点击 = 新增 point · 空格播放 · Delete 删除选中项 · 删除语音段会同时移除对应声音 · Ctrl/Command + Z 撤销</div>
+    <div class="aw-help">段身拖动 = 移动 · 拖两端 = 裁剪实际声音 · 助手段可绑定用户语音并设置响应间隔 · 语音段包络点上下拖动 = 调整音量，左右标记 = 淡入/末尾渐弱 · 空白处右键 = 新增片段、变量、任务事件或背景音 · 空格播放 · Delete 删除选中项 · 删除语音段会同时移除对应声音 · Ctrl/Command + Z 撤销</div>
   </section>
+
+  <div class="aw-context-menu" id="awContextMenu" role="menu" aria-label="新增轨道片段">
+    <button type="button" data-create-mode="segment">新增片段</button>
+    <button type="button" data-create-mode="variable">新增变量</button>
+    <button type="button" data-create-mode="task">新增任务事件</button>
+    <button type="button" data-create-mode="background">新增背景音片段</button>
+  </div>
 
 
   <div class="footnote">
@@ -5578,11 +5597,34 @@ const annotationWorkbench = (() => {
     }
   }
 
+  let contextTrack = null;
+  let contextPoint = null;
+  const contextMenu = document.querySelector('#awContextMenu');
+  function closeContextMenu() {
+    contextMenu?.classList.remove('show');
+    contextTrack = null;
+    contextPoint = null;
+  }
+  function openContextMenu(event, track) {
+    if (!contextMenu) return;
+    contextTrack = track;
+    contextPoint = { clientX:event.clientX, clientY:event.clientY };
+    contextMenu.style.left = `${Math.min(event.clientX, innerWidth - 205)}px`;
+    contextMenu.style.top = `${Math.min(event.clientY, innerHeight - 190)}px`;
+    contextMenu.classList.add('show');
+  }
   function bindTrack(track) {
     if (track.dataset.bound) return;
     track.dataset.bound = 'true';
+    track.addEventListener('contextmenu', event => {
+      if (event.target !== track) return;
+      event.preventDefault();
+      openContextMenu(event, track);
+    });
     track.addEventListener('pointerdown', event => {
-      if (event.button !== 0 || event.target !== track) return;
+      /* 空白处左键只定位/选择，不创建新片段；新增统一从右键菜单进入 */
+      if (event.button !== 0 || event.target !== track || track.dataset.allowCreate !== 'true') return;
+      delete track.dataset.allowCreate;
       event.preventDefault();
       const before = snapshotScene();
       const start = timeFromEvent(event, track);
@@ -5611,6 +5653,28 @@ const annotationWorkbench = (() => {
       document.addEventListener('pointermove', move); document.addEventListener('pointerup', up, { once:true });
     });
   }
+  contextMenu?.addEventListener('click', event => {
+    const button = event.target.closest('button[data-create-mode]');
+    if (!button || !contextTrack || !contextPoint) return;
+    const track = contextTrack;
+    const point = contextPoint;
+    const mode = button.dataset.createMode;
+    closeContextMenu();
+    track.dataset.allowCreate = 'true';
+    const down = new PointerEvent('pointerdown', { bubbles:true, button:0, clientX:point.clientX, clientY:point.clientY });
+    track.dispatchEvent(down);
+    const up = new PointerEvent('pointerup', { bubbles:true, button:0, clientX:point.clientX + (mode === 'segment' ? 40 : 0), clientY:point.clientY });
+    document.dispatchEvent(up);
+    const created = scene().segments.at(-1);
+    if (created && mode !== 'segment') {
+      created.type = mode === 'task' ? '任务事件' : mode === 'background' ? '背景音' : '自定义变量';
+      created.text = mode === 'task' ? '新任务事件' : mode === 'background' ? '新背景音片段' : '新变量';
+      persist(); render();
+    }
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!contextMenu?.contains(event.target)) closeContextMenu();
+  });
   function drawDraft(track, draft) {
     let el = track.querySelector('.aw-draft');
     if (!el) { el = document.createElement('div'); el.className = `aw-segment aw-draft ${TRACK_CLASSES[draft.track] || 'world'}`; track.appendChild(el); }
