@@ -1099,6 +1099,7 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
         <label class="aw-case-picker">Case
           <select id="awCaseSelect" aria-label="选择 Case"></select>
         </label>
+        <button class="aw-btn" id="awNewCase" type="button">新建 Case</button>
         <button class="aw-btn" id="awToStart" type="button">回到开头</button>
         <button class="aw-btn" id="awUndo" type="button" title="撤销 (Ctrl/Command+Z)" aria-label="撤销上一步" disabled>↶ 撤销</button>
         <span class="mono" id="awTime">0.0s / 58.3s</span>
@@ -6330,9 +6331,9 @@ const annotationWorkbench = (() => {
       .replace(/[^\p{L}\p{N}]+/gu, '-')
       .replace(/^-+|-+$/g, '')
       .slice(0, 48) || 'imported-case';
-    let importedId = `import-${baseId}`;
+    let importedId = scene()?.caseMeta?.blank ? caseId : `import-${baseId}`;
     let suffix = 2;
-    while (data[importedId]) importedId = `import-${baseId}-${suffix++}`;
+    while (!scene()?.caseMeta?.blank && data[importedId]) importedId = `import-${baseId}-${suffix++}`;
     const end = imported.reduce((max, item) => Math.max(max, item.end), 0);
     imported.forEach(item => {
       item.id = `${importedId}-${item.id}`;
@@ -6357,6 +6358,31 @@ const annotationWorkbench = (() => {
     render();
     setSaveState(`已解析 ${imported.length} 条脚本片段，可逐条生成音频`, 'saved');
   }
+  function createBlankCase() {
+    const beforeId = caseId;
+    let index = 1;
+    let id = `new-case-${index}`;
+    while (data[id]) id = `new-case-${++index}`;
+    const label = `新建 Case ${index}`;
+    META[id] = { label, audio:'', duration:30, imported:true };
+    CASES[id] = { label, run:() => Promise.resolve() };
+    BASE_DURATIONS[id] = 0;
+    data[id] = {
+      caseMeta:{ label, blank:true, createdAt:new Date().toISOString(), duration:30 },
+      customLayers:[],
+      audioEdits:{ mutedRanges:[] },
+      segments:[],
+      timelineDuration:30,
+    };
+    history[id] = [];
+    caseId = id;
+    currentCase = id;
+    selectedId = null;
+    renderCasePicker();
+    render();
+    persist();
+    setSaveState(`已新建 ${label}，请导入 Markdown 脚本`, 'saved');
+  }
 
   document.querySelectorAll('#awCanvas .aw-track').forEach(bindTrack);
   $('#awPlay').addEventListener('click', togglePlay);
@@ -6366,6 +6392,7 @@ const annotationWorkbench = (() => {
   $('#awExtend').addEventListener('click', () => extendTimeline(30));
   $('#awImportScript').addEventListener('click', () => $('#awScriptInput').click());
   $('#awCaseSelect').addEventListener('change', event => switchCase(event.target.value));
+  $('#awNewCase').addEventListener('click', createBlankCase);
   $('#awScriptInput').addEventListener('change', async event => {
     const file = event.target.files?.[0];
     event.target.value = '';
