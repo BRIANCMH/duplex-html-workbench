@@ -1094,6 +1094,8 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
         <button class="aw-btn" id="awUndo" type="button" title="撤销 (Ctrl/Command+Z)" aria-label="撤销上一步" disabled>↶ 撤销</button>
         <span class="mono" id="awTime">0.0s / 58.3s</span>
         <button class="aw-btn" id="awExtend" type="button" title="在当前音轨末尾增加 30 秒">+ 延长 30s</button>
+        <button class="aw-btn" id="awImportScript" type="button">导入 Markdown 脚本</button>
+        <input id="awScriptInput" type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
         <button class="aw-btn" id="awAddLayer" type="button">+ 新增层</button>
         <button class="aw-btn" id="awExport" type="button">导出 JSON</button>
         <button class="aw-btn primary" id="awSave" type="button" title="保存当前场景的全部编辑">保存编辑</button>
@@ -6209,12 +6211,91 @@ const annotationWorkbench = (() => {
   }
   function changeZoom(delta) { pxPerSec = clamp(pxPerSec + delta, 12, 72); render(); }
 
+  function parseTimecode(value) {
+    const match = String(value || '').match(/(\d{1,2}):(\d{2}(?:\.\d+)?)\s*[–-]\s*(\d{1,2}):(\d{2}(?:\.\d+)?)/);
+    if (!match) return null;
+    return {
+      start: Number(match[1]) * 60 + Number(match[2]),
+      end: Number(match[3]) * 60 + Number(match[4]),
+    };
+  }
+  function stripMarkdownCell(value) {
+    return String(value || '')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/!\[[^\]]*]\([^)]*\)/g, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\r/g, '')
+      .trim();
+  }
+  function parseGoldenCaseMarkdown(markdown) {
+    const segments = [];
+    const lines = String(markdown || '').split('\n');
+    lines.forEach((line, index) => {
+      if (!line.trim().startsWith('|') || line.split('|').length < 7) return;
+      const cells = line.split('|').slice(1, -1).map(stripMarkdownCell);
+      if (cells.length < 5 || !/^\d{1,2}:\d{2}/.test(cells[0])) return;
+      const time = parseTimecode(cells[0]);
+      if (!time || !cells[1] || /说话人/.test(cells[1])) return;
+      const speaker = cells[1].replace(/（用户.*?）/g, '').trim();
+      const role = /Amoo|助手|AI/.test(speaker) ? 'assistant'
+        : /系统|背景音|环境/.test(speaker) ? 'other' : 'user';
+      const script = cells[2]
+        .replace(/^[^：\n]+：\s*/gm, '')
+        .split('\n')
+        .filter(value => !/^（系统动作/.test(value))
+        .join('\n')
+        .trim();
+      if (!script) return;
+      segments.push({
+        id:`import-${Date.now().toString(36)}-${index}`,
+        track:role,
+        start:time.start,
+        end:Math.max(time.start + .05, time.end),
+        type:role === 'assistant' ? '助手语音' : role === 'user' ? '用户语音' : '其他人语音',
+        text:script,
+        source:'markdown-import',
+        mediaIn:0,
+        gainDb:0,
+        fadeIn:0,
+        fadeOut:0,
+        ttsDirty:true,
+        ttsText:script,
+      });
+    });
+    return segments;
+  }
+  async function importMarkdownScript(file) {
+    const markdown = await file.text();
+    const imported = parseGoldenCaseMarkdown(markdown);
+    if (!imported.length) throw new Error('未识别到五列表格中的时间轴和对白');
+    const before = snapshotScene();
+    scene().segments = imported;
+    scene().customLayers = scene().customLayers || [];
+    const end = imported.reduce((max, item) => Math.max(max, item.end), 0);
+    scene().timelineDuration = Math.max(Number(META[caseId].duration) || 0, end);
+    META[caseId].duration = scene().timelineDuration;
+    selectedId = imported[0].id;
+    pushHistory(before);
+    persist();
+    render();
+    setSaveState(`已解析 ${imported.length} 条脚本片段，可逐条生成音频`, 'saved');
+  }
+
   document.querySelectorAll('#awCanvas .aw-track').forEach(bindTrack);
   $('#awPlay').addEventListener('click', togglePlay);
   $('#awToStart').addEventListener('click', seekStart);
   $('#awUndo').addEventListener('click', undo);
   /* 浏览器内置页面不依赖 prompt/alert：每次点击固定延长 30 秒，可连续点击。 */
   $('#awExtend').addEventListener('click', () => extendTimeline(30));
+  $('#awImportScript').addEventListener('click', () => $('#awScriptInput').click());
+  $('#awScriptInput').addEventListener('change', async event => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try { await importMarkdownScript(file); }
+    catch (error) { setSaveState(error?.message || '脚本解析失败', 'error'); }
+  });
   $('#awZoomOut').addEventListener('click', () => changeZoom(-6));
   $('#awZoomIn').addEventListener('click', () => changeZoom(6));
   $('#awAddLayer').addEventListener('click', addLayer);
