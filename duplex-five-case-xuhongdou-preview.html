@@ -581,6 +581,12 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
   background:transparent; color:var(--ink-dim); font:300 11px inherit; cursor:pointer;
 }
 .aw-context-menu button:hover { background:rgba(255,255,255,.08); color:var(--ink); }
+.aw-case-picker { display:flex; align-items:center; gap:7px; color:var(--ink-soft); font-size:10.5px; }
+.aw-case-picker select {
+  max-width:220px; height:30px; padding:0 28px 0 9px;
+  border:1px solid var(--line-strong); border-radius:7px;
+  background:#111517; color:var(--ink); font:300 11px inherit;
+}
 @media (max-width:760px) {
   .aw-top { align-items:flex-start; flex-wrap:wrap; }
   .aw-actions { margin-left:0; width:100%; justify-content:flex-start; }
@@ -1090,6 +1096,9 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
       <span class="aw-current" id="awCurrent">当前场景 · 01 · 状态更新</span>
       <div class="aw-actions">
         <button class="aw-btn primary" id="awPlay" type="button">播放</button>
+        <label class="aw-case-picker">Case
+          <select id="awCaseSelect" aria-label="选择 Case"></select>
+        </label>
         <button class="aw-btn" id="awToStart" type="button">回到开头</button>
         <button class="aw-btn" id="awUndo" type="button" title="撤销 (Ctrl/Command+Z)" aria-label="撤销上一步" disabled>↶ 撤销</button>
         <span class="mono" id="awTime">0.0s / 58.3s</span>
@@ -4389,6 +4398,7 @@ renumberCaseCards();
 let currentCase = 'wind-will-remember';
 let journalAwaitingOpen = false;
 function selectCase(id) {
+  if (!CASES[id]) return;
   currentCase = id;
   journalAwaitingOpen = id === 'journal';
   const notice = $('#journalNotice');
@@ -4550,6 +4560,27 @@ const annotationWorkbench = (() => {
     if (wrote) setSaveState('已暂存，点击“保存编辑”写入文件');
     return wrote;
   }
+  let autoSaveTimer = null;
+  function schedulePersistentSave() {
+    if (location.protocol === 'file:' || typeof STANDALONE_EXPORT !== 'undefined' && STANDALONE_EXPORT) return;
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(async () => {
+      try {
+        const response = await fetch(STORAGE_API, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body:JSON.stringify({ data })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+        if (payload.updatedAt) writeStorageRevision(payload.updatedAt);
+        const now = new Date(payload.updatedAt || Date.now());
+        setSaveState(`已自动保存 ${now.toLocaleTimeString('zh-CN', { hour12:false })}`, 'saved');
+      } catch (error) {
+        setSaveState('自动保存失败，请点击“保存编辑”', 'error');
+      }
+    }, 700);
+  }
   async function savePersistentFile() {
     let serialized;
     try { serialized = JSON.stringify(data); }
@@ -4586,6 +4617,7 @@ const annotationWorkbench = (() => {
       Object.entries(META).forEach(([id, info]) => {
         info.duration = BASE_DURATIONS[id] || Number(info.duration) || 0;
       });
+      registerStoredCaseMeta(payload.data);
       const restored = normalize({
         ...seed(),
         ...JSON.parse(JSON.stringify(payload.data))
@@ -4601,6 +4633,7 @@ const annotationWorkbench = (() => {
       if (!writeRawToBrowser(serialized)) return;
       if (payload.updatedAt) writeStorageRevision(payload.updatedAt);
       Object.values(data).forEach(value => value.segments.forEach(registerGeneratedSource));
+      renderCasePicker();
       render();
       const savedAt = new Date(payload.updatedAt || Date.now());
       setSaveState(`已从文件恢复 ${savedAt.toLocaleTimeString('zh-CN', { hour12:false })}`, 'saved');
@@ -4622,6 +4655,18 @@ const annotationWorkbench = (() => {
   Object.values(LEGACY_EDITABLE_SCENES).forEach(scene => {
     META[scene.slug] = { label:`${String(scene.number).padStart(2, '0')} · ${scene.title}`, audio:scene.audioKey, duration:scene.duration };
   });
+  function registerStoredCaseMeta(source) {
+    Object.entries(source || {}).forEach(([id, value]) => {
+      if (META[id] || !value?.caseMeta) return;
+      META[id] = {
+        label:String(value.caseMeta.label || id),
+        audio:'',
+        duration:Number(value.timelineDuration || value.caseMeta.duration) || 30,
+        imported:true,
+      };
+      if (!CASES[id]) CASES[id] = { label:META[id].label, run:() => Promise.resolve() };
+    });
+  }
   /* 记录模板原始时长；用户延长音轨后，META.duration 会跟随当前场景更新。 */
   const BASE_DURATIONS = Object.fromEntries(Object.entries(META).map(([id, info]) => [id, Number(info.duration) || 0]));
   const TRACKS = ['user','assistant','world','task','decisions','hardware','background','other','taskAudio'];
@@ -4717,6 +4762,7 @@ const annotationWorkbench = (() => {
       saved = JSON.parse(raw);
     } catch (e) {}
     if (!saved || typeof saved !== 'object') return initial;
+    registerStoredCaseMeta(saved);
     const normalizedSaved = normalize(JSON.parse(JSON.stringify(saved)));
     /* 旧存档仍使用原始长停顿；只迁移一次，保留用户对片段内容和音量的编辑。 */
     Object.entries(normalizedSaved).forEach(([id, savedScene]) => {
@@ -4916,7 +4962,9 @@ const annotationWorkbench = (() => {
   }
   function persist() {
     try {
-      return writeStorageValue(JSON.stringify(data));
+      const wrote = writeStorageValue(JSON.stringify(data));
+      if (wrote) schedulePersistentSave();
+      return wrote;
     } catch (error) {
       setSaveState('保存失败，请导出 JSON', 'error');
       console.warn('[annotation-workbench] 编辑数据序列化失败', error);
@@ -5074,6 +5122,13 @@ const annotationWorkbench = (() => {
     updateUndoState();
     /* 重新渲染后立即刷新右上角时码，延长/撤销时不会保留旧总时长。 */
     tick();
+  }
+  function renderCasePicker() {
+    const select = $('#awCaseSelect');
+    if (!select) return;
+    select.innerHTML = Object.entries(META)
+      .map(([id, info]) => `<option value="${escapeHtml(id)}"${id === caseId ? ' selected' : ''}>${escapeHtml(info.label)}</option>`)
+      .join('');
   }
   function renderRuler(width) {
     const ruler = $('#awRuler');
@@ -6207,7 +6262,7 @@ const annotationWorkbench = (() => {
     stopPreview(); pause(); caseId = id; offset = 0; selectedId = null;
     $('#annotationWorkbench').dataset.scheduledAudio = '';
     $('#annotationWorkbench').dataset.scheduledAudioCount = '0';
-    render(); tick();
+    renderCasePicker(); render(); tick();
   }
   function changeZoom(delta) { pxPerSec = clamp(pxPerSec + delta, 12, 72); render(); }
 
@@ -6269,15 +6324,36 @@ const annotationWorkbench = (() => {
     const markdown = await file.text();
     const imported = parseGoldenCaseMarkdown(markdown);
     if (!imported.length) throw new Error('未识别到五列表格中的时间轴和对白');
-    const before = snapshotScene();
-    scene().segments = imported;
-    scene().customLayers = scene().customLayers || [];
+    const heading = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim();
+    const label = heading || file.name.replace(/\.(?:md|markdown|txt)$/i, '');
+    const baseId = label.toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48) || 'imported-case';
+    let importedId = `import-${baseId}`;
+    let suffix = 2;
+    while (data[importedId]) importedId = `import-${baseId}-${suffix++}`;
     const end = imported.reduce((max, item) => Math.max(max, item.end), 0);
-    scene().timelineDuration = Math.max(Number(META[caseId].duration) || 0, end);
-    META[caseId].duration = scene().timelineDuration;
+    imported.forEach(item => {
+      item.id = `${importedId}-${item.id}`;
+      item.source = file.name;
+    });
+    META[importedId] = { label, audio:'', duration:Math.max(30, end), imported:true };
+    CASES[importedId] = { label, run:() => Promise.resolve() };
+    BASE_DURATIONS[importedId] = 0;
+    data[importedId] = {
+      caseMeta:{ label, sourceFile:file.name, importedAt:new Date().toISOString(), duration:Math.max(30, end) },
+      customLayers:[],
+      audioEdits:{ mutedRanges:[] },
+      segments:imported,
+      timelineDuration:Math.max(30, end),
+    };
+    history[importedId] = [];
+    caseId = importedId;
+    currentCase = importedId;
     selectedId = imported[0].id;
-    pushHistory(before);
     persist();
+    renderCasePicker();
     render();
     setSaveState(`已解析 ${imported.length} 条脚本片段，可逐条生成音频`, 'saved');
   }
@@ -6289,6 +6365,7 @@ const annotationWorkbench = (() => {
   /* 浏览器内置页面不依赖 prompt/alert：每次点击固定延长 30 秒，可连续点击。 */
   $('#awExtend').addEventListener('click', () => extendTimeline(30));
   $('#awImportScript').addEventListener('click', () => $('#awScriptInput').click());
+  $('#awCaseSelect').addEventListener('change', event => switchCase(event.target.value));
   $('#awScriptInput').addEventListener('change', async event => {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -6313,7 +6390,7 @@ const annotationWorkbench = (() => {
     if (event.code === 'Space') { event.preventDefault(); togglePlay(); }
     if ((event.key === 'Delete' || event.key === 'Backspace') && selectedId) { event.preventDefault(); removeSelected(); }
   });
-  render(); tick(); restorePersistentFile();
+  renderCasePicker(); render(); tick(); restorePersistentFile();
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function attachAudio(segmentId, payload = {}, targetCaseId = caseId) {
     const targetId = META[targetCaseId] ? targetCaseId : caseId;
