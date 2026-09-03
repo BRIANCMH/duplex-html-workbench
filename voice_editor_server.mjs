@@ -366,12 +366,6 @@ async function handleExport(req, res) {
       env.STANDALONE_ANNOTATIONS_FILE = temporaryAnnotations;
     }
     env.STANDALONE_CASE_ID = caseId;
-    execFileSync(process.execPath, [script], {
-      cwd:ROOT,
-      env,
-      stdio:['ignore','pipe','pipe'],
-      encoding:'utf8'
-    });
     const labels = {
       stock:'股票查询',
       commute:'出门上班 · 打车',
@@ -379,7 +373,16 @@ async function handleExport(req, res) {
       'trip-planning':'出差规划 · 订票值机',
       'wind-will-remember':'风会替你记得'
     };
-    const filename = `${labels[caseId] || caseId}｜单文件外发版.html`;
+    const caseLabel = String(annotations?.[caseId]?.caseMeta?.label || labels[caseId] || caseId);
+    env.STANDALONE_CASE_LABEL = caseLabel;
+    execFileSync(process.execPath, [script], {
+      cwd:ROOT,
+      env,
+      stdio:['ignore','pipe','pipe'],
+      encoding:'utf8'
+    });
+    const safeLabel = caseLabel.replace(/[\\/:*?"<>|]/g, '-');
+    const filename = `${safeLabel}｜单文件外发版.html`;
     const relative = `exports/${filename}`;
     if (!fs.existsSync(path.join(ROOT, relative))) {
       return json(res, 500, { ok:false, error:'成品导出失败，未生成 HTML' });

@@ -19,7 +19,7 @@ const CASE_LABELS = {
   'trip-planning':'出差规划 · 订票值机',
   'wind-will-remember':'风会替你记得'
 };
-const CASE_LABEL = CASE_LABELS[CASE_ID] || CASE_ID;
+const CASE_LABEL = process.env.STANDALONE_CASE_LABEL || CASE_LABELS[CASE_ID] || CASE_ID;
 const FILE_LABEL = CASE_LABEL.replace(/[\\/:*?"<>|]/g, '-');
 const OUTPUT = process.env.STANDALONE_OUTPUT_FILE || path.join(EXPORT_DIR, `${FILE_LABEL}｜单文件外发版.html`);
 const DESKTOP_OUTPUT = process.env.STANDALONE_DESKTOP_OUTPUT_FILE || path.join(DESKTOP, `${FILE_LABEL}｜单文件外发版.html`);
@@ -201,10 +201,11 @@ async function build() {
     if (audioMap[key] || !legacyAudio[key]) continue;
     audioMap[key] = legacyAudio[key];
   }
+  const standaloneAnnotations = { [CASE_ID]: selectedScene };
   const audioScript = `<script>
 const TTS_CLIPS = ${jsonForScript(audioMap)};
 const STANDALONE_EXPORT = true;
-const STANDALONE_EXPORT_DATA = ${jsonForScript(annotations)};
+const STANDALONE_EXPORT_DATA = ${jsonForScript(standaloneAnnotations)};
 const STANDALONE_LOCAL_AUDIO = TTS_CLIPS;
 const TTS_WIND_WILL_REMEMBER_AUDIO = TTS_CLIPS;
 const TTS_WIND_WILL_REMEMBER_GAIN_COMPENSATION_DB = { xhd_system_memory: 14 };
@@ -287,6 +288,8 @@ const $ = s => document.querySelector(s);`,
   const readOnlyCss = `<style data-standalone-export>
 body.standalone-export #awUndo,
 body.standalone-export #awExtend,
+body.standalone-export #awImportScript,
+body.standalone-export .aw-case-picker,
 body.standalone-export #awAddLayer,
 body.standalone-export #awExport,
 body.standalone-export #awSave,
