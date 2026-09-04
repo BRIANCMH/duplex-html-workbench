@@ -58,12 +58,13 @@ cp .env.example .env
 解压文件夹后，在“终端”中执行下面三行（把路径替换成模板文件夹的实际路径）：
 
 ```bash
-cd "/你的路径/duplex-four-case-template"
+cd "/你的路径/duplex-html-workbench"
 xattr -dr com.apple.quarantine .
-chmod +x 启动模板.command && ./启动模板.command
+chmod +x 启动工作台.command 启动模板.command
+./启动工作台.command
 ```
 
-也可以先右键点击 `启动模板.command`，选择“打开”；如果系统仍拦截，到“系统设置 → 隐私与安全性”中允许本次打开。
+也可以先右键点击 `启动工作台.command`，选择“打开”；如果系统仍拦截，到“系统设置 → 隐私与安全性”中允许本次打开。
 
 在本目录启动统一服务：
 
@@ -71,14 +72,17 @@ chmod +x 启动模板.command && ./启动模板.command
 VOICE_EDITOR_PORT=4179 node voice_editor_server.mjs
 ```
 
-然后打开：
+然后打开最新可编辑工作台：
 
 ```text
-http://127.0.0.1:4179/duplex-four-case-template.html
 http://127.0.0.1:4179/duplex-five-case-xuhongdou-preview.html
 ```
 
-直接双击 HTML 时，页面也会自动跳转到对应地址。服务同时提供 `/api/tts`、`/api/audio/upload`、`/api/audio/library`、`/api/export` 和编辑存档接口；点击“保存编辑”后，场景会写入同目录的 `annotation-edits.json`，刷新页面会自动恢复。
+`启动工作台.command` 会调用兼容入口 `启动模板.command`，优先使用 4179 端口，冲突时自动选择可用端口，并打开最新的 `duplex-five-case-xuhongdou-preview.html`。直接双击编辑 HTML 时会探测本机工作台服务；推荐始终从启动脚本进入。服务同时提供 `/api/tts`、`/api/audio/upload`、`/api/audio/library`、`/api/export` 和编辑存档接口；编辑后会自动保存，点击“保存编辑”也会写入同目录的 `annotation-edits.json`。
+
+注意：`exports/` 下的单文件外发版是只读播放文件，刻意不包含录音、导入 Markdown、新建 Case 和编辑控件。需要录音或继续雕花时，必须把完整 Workbench 工程目录发给同事，由对方运行 `启动工作台.command`，并允许浏览器访问麦克风。
+
+首次录音时，浏览器必须允许麦克风；如果之前拒绝过，需要从地址栏左侧权限图标恢复。macOS 还需要在“系统设置 → 隐私与安全性 → 麦克风”中允许当前浏览器。未配置 `STEP_API_KEY` 不影响真人录音，只影响 TTS 生成。
 
 ### 固定本地音频根目录
 
@@ -101,5 +105,5 @@ audio-library/
 
 - `demo.html` 是音频已内嵌的单文件 Showcase，可直接分享或通过 GitHub Pages 打开。
 - 为保护个人音频，公开 Demo 的用户声道使用结构占位；本地编辑器可接入自己的音频库。
-- 编辑器需要在本地运行 `node voice_editor_server.mjs`；上传/录音写入本机 `audio-library/`。
+- 编辑器需要在本地运行 `node voice_editor_server.mjs`；推荐直接运行 `启动工作台.command`。上传/录音写入本机 `audio-library/`。
 - 个人 `annotation-edits.json`、浏览器录音和本地生成缓存不进入公开仓库；`annotation-edits.example.json` 仅作为数据结构示例。

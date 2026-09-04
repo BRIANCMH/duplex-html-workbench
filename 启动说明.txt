@@ -1,23 +1,32 @@
-四案例全双工模板 · macOS 启动说明
+双工 HTML Workbench · macOS 启动说明
 
 从飞书下载并解压后，如果双击“启动模板.command”提示“已损坏”，这是 macOS 的下载隔离保护，不是文件损坏。
 
 请打开“终端”，执行（把路径替换成此文件夹的实际路径）：
 
-cd "/你的路径/duplex-four-case-template"
+cd "/你的路径/duplex-html-workbench"
 xattr -dr com.apple.quarantine .
-chmod +x 启动模板.command && ./启动模板.command
+chmod +x 启动工作台.command 启动模板.command
+./启动工作台.command
 
-启动后访问：
-http://127.0.0.1:4179/duplex-four-case-template.html
+启动后会自动打开最新的可编辑工作台：
+http://127.0.0.1:4179/duplex-five-case-xuhongdou-preview.html
 
-需要 Node.js 运行环境。仓库不包含任何真实 API Key。
+请不要把“单文件外发版 HTML”当作编辑器使用。单文件外发版只用于播放展示，不能录音、导入 Markdown 或新建 Case。
+
+录音权限：
+  1. 必须通过上面的 localhost 工作台地址打开，不能直接双击外发 HTML
+  2. 首次点击“开始录音”时，在浏览器弹窗中选择“允许”
+  3. 如果之前点过拒绝，点击地址栏左侧权限图标，将麦克风改成“允许”，然后刷新页面
+  4. macOS 还需要在“系统设置 → 隐私与安全性 → 麦克风”中允许 Chrome、Edge 或 Safari
+
+需要 Node.js 运行环境。推荐安装 ffmpeg；未安装时录音会保留浏览器原始格式。仓库不包含任何真实 API Key。
 启动脚本会自动读取本目录的 `.env`；如果本目录没有 `.env`，会自动读取同级主工程 `双工html雕花/.env` 中的 `STEP_API_KEY`。因此从主工程启动时无需重复填写。也可以复制 `.env.example` 为本目录 `.env` 覆盖默认来源。
 音频统一保存在项目根目录的 audio-library/：
   uploads/：上传文件和电脑录音
   generated/：新生成的 TTS
   reference/：已有参考音频
-音轨区支持拖动片段调整开口时码；点击“保存编辑”后写入 annotation-edits.json。
+音轨区支持拖动片段调整开口时码；编辑后会自动保存，并可点击“保存编辑”写入 annotation-edits.json。
 助手音轨可绑定用户语音并设置响应间隔（默认 400ms）；移动用户片段时，已绑定的助手片段会同步移动。
 使用“导出成品 HTML”可下载音频已内嵌的单文件分享版。
 不要把 .env 或任何真实 API Key 提交到 Git。

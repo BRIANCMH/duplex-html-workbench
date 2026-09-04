@@ -109,6 +109,29 @@
     });
   }
 
+  function blobDuration(blob) {
+    return new Promise(resolve => {
+      const url = URL.createObjectURL(blob);
+      const audio = document.createElement('audio');
+      const done = value => {
+        URL.revokeObjectURL(url);
+        audio.removeAttribute('src');
+        resolve(Number.isFinite(value) && value > 0 ? value : null);
+      };
+      const timer = setTimeout(() => done(null), 4000);
+      audio.preload = 'metadata';
+      audio.onloadedmetadata = () => {
+        clearTimeout(timer);
+        done(Number(audio.duration));
+      };
+      audio.onerror = () => {
+        clearTimeout(timer);
+        done(null);
+      };
+      audio.src = url;
+    });
+  }
+
   async function uploadBlob(blob, name, kind, target = null) {
     const item = selected();
     const targetCaseId = target?.caseId || caseId();
@@ -116,6 +139,7 @@
     if (!targetSegmentId) throw new Error('请先选择一段音轨');
     if (!blob || blob.size < 1) throw new Error('音频内容为空');
     setStatus('正在写入本地音频库…');
+    const measuredDuration = Number(target?.duration) || await blobDuration(blob);
     const response = await fetch(`${apiBase()}/api/audio/upload`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -125,7 +149,8 @@
         name: name || 'recording.webm',
         mime: blob.type || 'application/octet-stream',
         data: await blobToDataUrl(blob),
-        kind
+        kind,
+        duration: Number.isFinite(measuredDuration) ? measuredDuration : null
       })
     });
     const payload = await response.json().catch(() => ({}));
@@ -168,6 +193,14 @@
       setStatus('当前浏览器不支持电脑录音', 'error');
       return;
     }
+    if (location.protocol !== 'http:' && location.protocol !== 'https:') {
+      setStatus('录音需要通过本地 Workbench 服务打开，不能直接双击外发 HTML', 'error');
+      return;
+    }
+    if (!window.isSecureContext && !['localhost', '127.0.0.1'].includes(location.hostname)) {
+      setStatus('录音需要安全来源，请从 localhost 或 HTTPS 地址打开', 'error');
+      return;
+    }
     try {
       recorderTarget = { caseId: caseId(), segmentId: item.id };
       try {
@@ -195,6 +228,7 @@
         const chunks = recorderChunks.slice();
         const target = recorderTarget;
         const blob = new Blob(chunks, { type });
+        const duration = Math.max(.05, (Date.now() - recorderStartedAt) / 1000);
         const extension = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm';
         recorder = null;
         recorderTarget = null;
@@ -202,7 +236,7 @@
         updateRecordButtons();
         stopRecorderTimer();
         try {
-          await uploadBlob(blob, `recording.${extension}`, 'recording', target);
+          await uploadBlob(blob, `recording.${extension}`, 'recording', { ...target, duration });
         } catch (error) {
           setStatus(error?.message || '录音上传失败', 'error');
         }
@@ -217,7 +251,13 @@
       recorder = null;
       recorderTarget = null;
       updateRecordButtons();
-      setStatus(error?.message || '未获得麦克风权限', 'error');
+      const name = String(error?.name || '');
+      const message = name === 'NotAllowedError' || name === 'SecurityError'
+        ? '麦克风权限被拒绝，请在浏览器地址栏或网站设置中允许麦克风后重试'
+        : name === 'NotFoundError'
+          ? '没有检测到可用麦克风，请检查系统输入设备'
+          : error?.message || '未获得麦克风权限';
+      setStatus(message, 'error');
     }
   }
 

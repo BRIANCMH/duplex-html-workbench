@@ -164,11 +164,13 @@ async function build() {
   for (const [key, file] of Object.entries(generatedFiles)) audioFiles[key] = file;
 
   const audioMap = {};
+  const missingAudio = [];
   for (const [key, file] of Object.entries(audioFiles)) {
     try {
       await fs.access(file);
     } catch {
-      throw new Error(`缺少音频资源：${file}`);
+      missingAudio.push({ key, file });
+      continue;
     }
     audioMap[key] = await base64(file);
   }
@@ -227,7 +229,7 @@ const TTS_WIND_WILL_REMEMBER_GAIN_COMPENSATION_DB = { xhd_system_memory: 14 };
   );
 
   html = html.replace(
-    /\/\* file:\/\/ 的浏览器存储并不稳定；本地服务可用时统一切到固定 HTTP 源。 \*\/\s*if \(location\.protocol === 'file:'\) \{[\s\S]*?\n\}/,
+    /\/\* WORKBENCH_FILE_REDIRECT_START[\s\S]*?\/\* WORKBENCH_FILE_REDIRECT_END \*\//,
     '/* 单文件外发版：所有资源已内嵌，不跳转本地服务。 */',
   );
 
@@ -289,6 +291,8 @@ const $ = s => document.querySelector(s);`,
 body.standalone-export #awUndo,
 body.standalone-export #awExtend,
 body.standalone-export #awImportScript,
+body.standalone-export #awNewCase,
+body.standalone-export #awExportHtml,
 body.standalone-export .aw-case-picker,
 body.standalone-export #awAddLayer,
 body.standalone-export #awExport,
@@ -297,6 +301,14 @@ body.standalone-export #awReset,
 body.standalone-export .aw-help,
 body.standalone-export .aw-editor { display:none !important; }
 body.standalone-export #awPlay { display:inline-flex; }
+body.standalone-export .annotation-workbench::before {
+  content:'只读外发版 · 录音、新建 Case 和脚本导入请使用本地 Workbench';
+  display:block;
+  padding:9px 16px;
+  border-bottom:1px solid var(--line);
+  color:var(--ink-soft);
+  font-size:11px;
+}
 </style>`;
   html = html.replace('</head>', `${readOnlyCss}\n</head>`);
 
@@ -334,6 +346,7 @@ body.standalone-export #awPlay { display:inline-flex; }
   console.log(`audio_keys=${Object.keys(audioMap).length}`);
   console.log(`case_id=${CASE_ID}`);
   console.log(`segments=${selectedScene.segments.length}`);
+  if (missingAudio.length) console.log(`missing_audio=${missingAudio.map(item => item.key).join(',')}`);
   console.log(`annotation_sha256=${annotationHash}`);
 }
 

@@ -1180,11 +1180,38 @@ h1 { font-size: 22px; font-weight: 300; letter-spacing: -0.01em; margin-top: 6px
 /* ---------------- utilities ---------------- */
 const $ = s => document.querySelector(s);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-/* file:// 的浏览器存储并不稳定；本地服务可用时统一切到固定 HTTP 源。 */
+/* WORKBENCH_FILE_REDIRECT_START
+   Direct file opening cannot record or persist. Probe the documented local
+   ports so a running Workbench is reused; otherwise show a concrete recovery. */
 if (location.protocol === 'file:') {
-  const servedPage = 'http://127.0.0.1:4179/duplex-five-case-xuhongdou-preview.html';
-  location.replace(`${servedPage}${location.hash}`);
+  const ports = [4179, 4180, 4377, 4390, 4400, 4401, 4402, 4403, 4404, 4405];
+  const entry = 'duplex-five-case-xuhongdou-preview.html';
+  const notice = document.createElement('div');
+  notice.setAttribute('role', 'status');
+  notice.style.cssText = 'position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:#0a0c0df2;color:#e8eced;font:14px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;text-align:center';
+  notice.innerHTML = '<div style="max-width:560px"><b style="display:block;font-size:18px;margin-bottom:8px">正在查找本地可编辑工作台</b><span style="color:#a6afb2">录音、新建 Case 和保存编辑需要通过 localhost 服务运行</span></div>';
+  document.body.appendChild(notice);
+  (async () => {
+    for (const port of ports) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 500);
+        const response = await fetch(`http://127.0.0.1:${port}/api/health`, {
+          cache:'no-store',
+          signal:controller.signal
+        });
+        clearTimeout(timeout);
+        const payload = await response.json();
+        if (response.ok && payload?.ok) {
+          location.replace(`http://127.0.0.1:${port}/${payload.editorEntry || entry}${location.hash}`);
+          return;
+        }
+      } catch {}
+    }
+    notice.innerHTML = '<div style="max-width:600px"><b style="display:block;font-size:18px;margin-bottom:8px">本地工作台尚未启动</b><span style="color:#a6afb2">请打开完整工程文件夹，运行“启动工作台.command”，再回到浏览器。单文件外发版只能播放，不能录音或新建 Case。</span></div>';
+  })();
 }
+/* WORKBENCH_FILE_REDIRECT_END */
 /* 默认模板场景：图1 Case11 的股票查询，使用图2 的六轨编辑数据结构。 */
 const STOCK_LINES = [
   { key:'sa0', speaker:'助手', role:'assistant', text:'我在，你说。', start:0, duration:1.408, audioKey:'sa0' },

@@ -18,6 +18,7 @@ const EDITS_FILE = process.env.VOICE_EDITOR_EDITS_FILE
 /* 分享模板使用独立端口，避免误连到原 Golden Case 服务。 */
 const PORT = Number(process.env.VOICE_EDITOR_PORT || 4179);
 const HOST = '127.0.0.1';
+const EDITOR_ENTRY = 'duplex-five-case-xuhongdou-preview.html';
 const VOICES = {
   assistant: 'elegantgentle-female',
   user: 'voice-tone-TfP7m5TSzY',
@@ -37,6 +38,17 @@ const sourceScenes = fs.existsSync(SCENES_FILE) ? JSON.parse(fs.readFileSync(SCE
 };
 const apiKey = String(process.env.STEP_API_KEY || '').trim();
 let lastRequestAt = 0;
+
+function commandAvailable(command) {
+  try {
+    execFileSync(command, ['-version'], { stdio:'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+const FFMPEG_AVAILABLE = commandAvailable('ffmpeg');
+const FFPROBE_AVAILABLE = commandAvailable('ffprobe');
 
 fs.mkdirSync(GENERATED_ROOT, { recursive:true });
 fs.mkdirSync(UPLOAD_ROOT, { recursive:true });
@@ -152,6 +164,7 @@ function audioLibraryUrl(file) {
 }
 
 function probe(file) {
+  if (!FFPROBE_AVAILABLE) return NaN;
   try {
     return Number(execFileSync('ffprobe', [
       '-v','error','-show_entries','format=duration','-of','default=nw=1:nk=1',file
@@ -162,6 +175,7 @@ function probe(file) {
 }
 
 function normalizeAudio(source, output) {
+  if (!FFMPEG_AVAILABLE) throw new Error('ffmpeg unavailable');
   /* 保留 TTS 的自然语速和完整句尾；前端会用真实时长更新音轨区间。 */
   execFileSync('ffmpeg', [
     '-y','-hide_banner','-loglevel','error','-i',source,
@@ -275,6 +289,12 @@ async function handleAudioUpload(req, res) {
       normalized = false;
     }
     let duration = probe(output);
+    if (!Number.isFinite(duration) || duration < .01) {
+      const browserDuration = Number(body.duration);
+      if (Number.isFinite(browserDuration) && browserDuration >= .05) {
+        duration = browserDuration;
+      }
+    }
     if (!Number.isFinite(duration) || duration < .01) {
       if (output !== rawOutput) {
         try { fs.unlinkSync(output); } catch {}
@@ -495,7 +515,7 @@ async function handleGenerate(req, res) {
 
 function serveFile(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || `${HOST}:${PORT}`}`);
-  const requested = decodeURIComponent(url.pathname === '/' ? '/duplex-four-case-template.html' : url.pathname);
+  const requested = decodeURIComponent(url.pathname === '/' ? `/${EDITOR_ENTRY}` : url.pathname);
   const usesAudioLibrary = requested === '/audio-library' || requested.startsWith('/audio-library/');
   const root = usesAudioLibrary ? AUDIO_LIBRARY_ROOT : PUBLIC_ROOT;
   const rootedRequest = usesAudioLibrary ? requested.slice('/audio-library'.length) || '/' : requested;
@@ -522,7 +542,14 @@ function serveFile(req, res) {
 const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') return json(res, 204, {});
   if (req.method === 'GET' && req.url?.startsWith('/api/health')) {
-    return json(res, 200, { ok:true, voices:VOICES });
+    return json(res, 200, {
+      ok:true,
+      editorEntry:EDITOR_ENTRY,
+      recording:true,
+      ffmpeg:FFMPEG_AVAILABLE,
+      ffprobe:FFPROBE_AVAILABLE,
+      voices:VOICES
+    });
   }
   if (req.method === 'GET' && req.url?.startsWith('/api/audio/library')) return handleAudioLibrary(req, res);
   if (req.method === 'POST' && req.url?.startsWith('/api/audio/upload')) return handleAudioUpload(req, res);
@@ -536,5 +563,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  process.stdout.write(`Voice editor ready: http://${HOST}:${PORT}/duplex-four-case-template.html\n`);
+  process.stdout.write(`Voice editor ready: http://${HOST}:${PORT}/${EDITOR_ENTRY}\n`);
 });

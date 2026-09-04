@@ -1,5 +1,6 @@
 .DS_Store
 .env
+voice-editor.log
 
 # 当前四案例的音频已嵌入 clips.js / new-audio.js。
 # 原始生产音轨保留在本机，不进入轻量工程仓库。
